@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace NuclearTacview
 {
@@ -46,7 +45,7 @@ namespace NuclearTacview
             { "FGA-57 Anvil", 5500 }
         };
 
-        private int lastTarget;
+        private Unit? lastTarget;
 
         public new readonly GroundVehicle unit;
 
@@ -65,6 +64,44 @@ namespace NuclearTacview
 
             if (RANGE.TryGetValue(unit.definition.unitName, out int range))
                 props.Add("EngagementRange", range.ToString());
+
+            return props;
+        }
+
+        public override Dictionary<string, string> Update()
+        {
+            Dictionary<string, string> props = base.Update();
+
+            if (unit.weaponStations.Count > 0)
+            {
+                Turret turret = unit.weaponStations[0].GetTurret();
+                Unit? target = turret.GetTarget();
+
+                if (target != lastTarget)
+                {
+                    if (target != null)
+                    {
+                        props["LockedTarget"] = target.persistentID.ToString();
+
+                        if (lastTarget == null)
+                            props["LockedTargetMode"] = "1";
+
+                        lastTarget = target;
+                    }
+                    else
+                    {
+                        if (lastTarget != null)
+                        {
+                            if (lastTarget.disabled || !turret.GetWeaponStation().reloading) // When reloading we get false negatives
+                            {
+                                props["LockedTargetMode"] = "0";
+                                lastTarget = target;
+                            }
+                        }
+                    }
+
+                }
+            }
 
             return props;
         }

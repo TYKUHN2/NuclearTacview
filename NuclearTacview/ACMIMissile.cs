@@ -28,7 +28,7 @@ namespace NuclearTacview
         private float lastAGL = float.NaN;
         private float lastTAS = float.NaN;
         private float lastAOA = float.NaN;
-        private int lastTarget = 0;
+        private int lastTarget = -1;
         internal bool Detonated
         {
             get; private set;
@@ -93,7 +93,17 @@ namespace NuclearTacview
 
             if (unit.targetID != lastTarget)
             {
-                baseProps.Add("LockedTarget", unit.targetID.ToString("X"));
+                if (unit.targetID != -1)
+                {
+                    baseProps.Add("LockedTarget", unit.targetID.ToString("X"));
+
+                    if (lastTarget == -1)
+                        baseProps.Add("LockedTargetMode", "1");
+                }
+                else
+                    baseProps.Add("LockedTargetMode", "0");
+
+
                 lastTarget = unit.targetID;
             }
 
