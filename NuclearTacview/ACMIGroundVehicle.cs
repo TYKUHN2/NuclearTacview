@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NuclearTacview
@@ -12,7 +12,7 @@ namespace NuclearTacview
             { "T9K41 Boltstrike", "Ground+Heavy+Vehicle+AntiAircraft" },
             { "Spearhead MBT", "Ground+Heavy+Vehicle+Tank" },
             { "Type-12 MBT", "Ground+Heavy+Vehicle+Tank" },
-            { "HLT Radar Truck", "Ground+Heavy+Vehicle" },
+            { "HLT Radar Truck", "Ground+Heavy+Vehicle+Sensor" },
             { "HLT Flatbed", "Ground+Heavy+Vehicle" },
             { "HLT Munitions Truck", "Ground+Heavy+Vehicle" },
             { "HLT Tractor", "Ground+Heavy+Vehicle" },

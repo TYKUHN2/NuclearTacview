@@ -20,7 +20,7 @@ namespace NuclearTacview
         {
             Dictionary<string, string> props = base.Init();
 
-            props["Type"] = "Ground+Static+Building";
+            props["Type"] = "Ground+Static+Building" + (unit.definition.code == "RDR" ? "+Sensor" : string.Empty);
 
             return props;
         }
