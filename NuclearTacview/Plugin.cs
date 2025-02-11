@@ -93,6 +93,9 @@ public class Plugin: BaseUnityPlugin
                         case Building:
                             acmi = new ACMIBuilding((Building)unit);
                             break;
+                        case Ship:
+                            acmi = new ACMIShip((Ship)unit);
+                            break;
                         default:
                             continue;
                     }
