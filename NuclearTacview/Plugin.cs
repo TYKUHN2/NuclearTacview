@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using NuclearOption.SavedMission;
 using System;
@@ -50,6 +50,8 @@ public class Plugin: BaseUnityPlugin
         private DateTime curTime;
         private ACMIWriter writer;
         private readonly Dictionary<long, ACMIUnit> objects = [];
+        private readonly List<ACMIFlare> flares = [];
+        private readonly List<ACMIFlare> newFlare = [];
 
         internal Recorder(Mission mission)
         {
@@ -70,6 +72,13 @@ public class Plugin: BaseUnityPlugin
                     writer.RemoveObject(acmi, curTime);
                 }
 
+            foreach (var acmi in flares.ToList())
+                if (acmi.flare == null || !acmi.flare.enabled) // Apparently we can lose references? wtf?
+                {
+                    flares.Remove(acmi);
+                    writer.RemoveObject(acmi, curTime);
+                }
+
             Unit[] units = FindObjectsByType<Unit>(FindObjectsSortMode.None);
             foreach (var unit in units)
             {
@@ -81,8 +90,15 @@ public class Plugin: BaseUnityPlugin
                 {
                     switch (unit)
                     {
-                        case Aircraft:
-                            acmi = new ACMIAircraft((Aircraft)unit);
+                        case Aircraft aircraft:
+                            acmi = new ACMIAircraft(aircraft);
+
+                            aircraft.onAddIRSource += (IRSource source) =>
+                            {
+                                if (source.flare)
+                                    newFlare.Add(new(source));
+                            };
+
                             break;
                         case Missile:
                             acmi = new ACMIMissile((Missile)unit);
@@ -115,6 +131,19 @@ public class Plugin: BaseUnityPlugin
 
                 writer.UpdateObject(acmi, curTime, props);
             }
+
+            foreach (ACMIFlare flare in newFlare)
+            {
+                Dictionary<string, string> props = flare.Update();
+                props = props.Concat(flare.Init()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                writer.UpdateObject(flare, curTime, props);
+            }
+
+            foreach (ACMIFlare flare in flares)
+                writer.UpdateObject(flare, curTime, flare.Update());
+
+            flares.AddRange(newFlare);
+            newFlare.Clear();
 
             writer.Flush();
         }
