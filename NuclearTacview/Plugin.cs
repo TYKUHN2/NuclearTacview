@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Logging;
 using NuclearOption.SavedMission;
 using System;
@@ -49,7 +49,7 @@ public class Plugin: BaseUnityPlugin
         private readonly DateTime startDate;
         private DateTime curTime;
         private ACMIWriter writer;
-        private readonly Dictionary<int, ACMIUnit> objects = [];
+        private readonly Dictionary<long, ACMIUnit> objects = [];
 
         internal Recorder(Mission mission)
         {
@@ -63,9 +63,12 @@ public class Plugin: BaseUnityPlugin
         {
             curTime += TimeSpan.FromSeconds(delta);
 
-            foreach (var acmi in objects.Values)
+            foreach (var acmi in objects.Values.ToList())
                 if (acmi.unit.disabled)
+                {
                     objects.Remove(acmi.id);
+                    writer.RemoveObject(acmi, curTime);
+                }
 
             Unit[] units = FindObjectsByType<Unit>(FindObjectsSortMode.None);
             foreach (var unit in units)
@@ -113,9 +116,9 @@ public class Plugin: BaseUnityPlugin
             writer.Flush();
         }
 
-        private void WriteEvent(string name, int[] ids, string text)
+        private void WriteEvent(string name, long[] ids, string text)
         {
-            writer.WriteEvent(curTime, name, [..ids.Select(a => a.ToString()), text]);
+            writer.WriteEvent(curTime, name, [..ids.Select(a => a.ToString("X")), text]);
             writer.Flush();
         }
     }
